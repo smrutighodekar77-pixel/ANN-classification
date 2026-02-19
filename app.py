@@ -5,8 +5,8 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 import pandas as pd
 import pickle
 
-# Load the trained model
-model = tf.keras.models.load_model('model.h5')
+# Load the trained model (Fixed for TF 2.20 / Keras 3)
+model = tf.keras.models.load_model('model.h5', compile=False)
 
 # Load the encoders and scaler
 with open('label_encoder_gender.pkl', 'rb') as file:
@@ -19,7 +19,7 @@ with open('scaler.pkl', 'rb') as file:
     scaler = pickle.load(file)
 
 
-## streamlit app
+# Streamlit app
 st.title('Customer Churn Prediction')
 
 # User input
@@ -47,25 +47,26 @@ input_data = pd.DataFrame({
     'EstimatedSalary': [estimated_salary]
 })
 
-# One-hot encode 'Geography'
+# One-hot encode Geography
 geo_encoded = onehot_encoder_geo.transform([[geography]]).toarray()
-geo_encoded_df = pd.DataFrame(geo_encoded, columns=onehot_encoder_geo.get_feature_names_out(['Geography']))
+geo_encoded_df = pd.DataFrame(
+    geo_encoded,
+    columns=onehot_encoder_geo.get_feature_names_out(['Geography'])
+)
 
-# Combine one-hot encoded columns with input data
+# Combine encoded geography with input data
 input_data = pd.concat([input_data.reset_index(drop=True), geo_encoded_df], axis=1)
 
-# Scale the input data
+# Scale input
 input_data_scaled = scaler.transform(input_data)
 
-
 # Predict churn
-prediction = model.predict(input_data_scaled)
+prediction = model.predict(input_data_scaled, verbose=0)
 prediction_proba = prediction[0][0]
 
 st.write(f'Churn Probability: {prediction_proba:.2f}')
 
 if prediction_proba > 0.5:
-    st.write('The customer is likely to churn.')
+    st.success('The customer is likely to churn.')
 else:
-    st.write('The customer is not likely to churn.')
- 
+    st.success('The customer is not likely to churn.')
