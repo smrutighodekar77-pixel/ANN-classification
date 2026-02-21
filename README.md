@@ -9,10 +9,15 @@ It demonstrates the complete end-to-end machine learning workflow — from data 
 Tech Stack
 
 Python
+
 Pandas
+
 Scikit-learn
+
 TensorFlow / Keras
+
 SciKeras
+
 Streamlit
 
 Project Workflow
